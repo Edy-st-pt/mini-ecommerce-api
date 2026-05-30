@@ -3,7 +3,6 @@ package com.edu.ecommerce.service;
 import com.edu.ecommerce.domain.ItemPedido;
 import com.edu.ecommerce.domain.Pedido;
 import com.edu.ecommerce.domain.Produto;
-import com.edu.ecommerce.dto.PedidoDTOs.ItemRequestDTO;
 import com.edu.ecommerce.dto.PedidoDTOs.PedidoRequestDTO;
 import com.edu.ecommerce.repository.PedidoRepository;
 import com.edu.ecommerce.repository.ProdutoRepository;
@@ -20,12 +19,10 @@ public class PedidoService {
 
     private final PedidoRepository pedidoRepository;
     private final ProdutoRepository produtoRepository;
-    private final NotificacaoService notificacaoService;
 
-    public PedidoService(PedidoRepository pedidoRepository, ProdutoRepository produtoRepository, NotificacaoService notificacaoService) {
+    public PedidoService(PedidoRepository pedidoRepository, ProdutoRepository produtoRepository) {
         this.pedidoRepository = pedidoRepository;
         this.produtoRepository = produtoRepository;
-        this.notificacaoService = notificacaoService;
     }
 
     public List<Pedido> listarTodos() {
@@ -56,12 +53,12 @@ public class PedidoService {
     // Problemas presentes neste método:
     //
     // 1. Falta @Transactional: sem ele, o acesso a pedido.getItens()
-    //    (relação LAZY) pode lançar LazyInitializationException.
+    // (relação LAZY) pode lançar LazyInitializationException.
     //
     // 2. Falta validação de estoque: o sistema permite marcar como
-    //    ENVIADO mesmo que um produto esteja com estoque zerado.
-    //    Ao confirmar o envio, o estoque de cada produto deve ser
-    //    decrementado pela quantidade do item.
+    // ENVIADO mesmo que um produto esteja com estoque zerado.
+    // Ao confirmar o envio, o estoque de cada produto deve ser
+    // decrementado pela quantidade do item.
     //
     // Use IA para corrigir ambos os problemas.
     // =========================================================
@@ -83,12 +80,7 @@ public class PedidoService {
 
         pedido.setStatus(novoStatus);
 
-        Pedido pedidoSalvo = pedidoRepository.save(pedido);
-
-        // Dispara notificação assíncrona (Tarefa 3)
-        notificacaoService.notificarMudancaStatus(pedidoSalvo);
-
-        return pedidoSalvo;
+        return pedidoRepository.save(pedido);
     }
 
     public List<Pedido> filtrar(String status, LocalDate dataInicio, LocalDate dataFim, Double valorMinimo) {
