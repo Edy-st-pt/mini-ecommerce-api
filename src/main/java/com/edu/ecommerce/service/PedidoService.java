@@ -20,10 +20,12 @@ public class PedidoService {
 
     private final PedidoRepository pedidoRepository;
     private final ProdutoRepository produtoRepository;
+    private final NotificacaoService notificacaoService;
 
-    public PedidoService(PedidoRepository pedidoRepository, ProdutoRepository produtoRepository) {
+    public PedidoService(PedidoRepository pedidoRepository, ProdutoRepository produtoRepository, NotificacaoService notificacaoService) {
         this.pedidoRepository = pedidoRepository;
         this.produtoRepository = produtoRepository;
+        this.notificacaoService = notificacaoService;
     }
 
     public List<Pedido> listarTodos() {
@@ -81,7 +83,12 @@ public class PedidoService {
 
         pedido.setStatus(novoStatus);
 
-        return pedidoRepository.save(pedido);
+        Pedido pedidoSalvo = pedidoRepository.save(pedido);
+
+        // Dispara notificação assíncrona (Tarefa 3)
+        notificacaoService.notificarMudancaStatus(pedidoSalvo);
+
+        return pedidoSalvo;
     }
 
     public List<Pedido> filtrar(String status, LocalDate dataInicio, LocalDate dataFim, Double valorMinimo) {
