@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.time.LocalDate;
+import com.edu.ecommerce.repository.PedidoSpecification;
 
 @Service
 public class PedidoService {
@@ -80,5 +82,9 @@ public class PedidoService {
         pedido.setStatus(novoStatus);
 
         return pedidoRepository.save(pedido);
+    }
+
+    public List<Pedido> filtrar(String status, LocalDate dataInicio, LocalDate dataFim, Double valorMinimo) {
+        return pedidoRepository.findAll(PedidoSpecification.comFiltros(status, dataInicio, dataFim, valorMinimo));
     }
 }

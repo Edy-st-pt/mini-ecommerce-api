@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @RestController
 @RequestMapping("/api/pedidos")
@@ -54,6 +56,14 @@ public class PedidoController {
     // - Usar Spring Data JPA Specification (sem SQL nativo)
     // - Criar a classe PedidoSpecification no pacote repository
     // =========================================================
+    @GetMapping("/filtrar")
+    public ResponseEntity<List<Pedido>> filtrar(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicio,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFim,
+            @RequestParam(required = false) Double valorMinimo) {
+        return ResponseEntity.ok(pedidoService.filtrar(status, dataInicio, dataFim, valorMinimo));
+    }
 
     // =========================================================
     // 🚀 FUNCIONALIDADE B — TAREFA 3
