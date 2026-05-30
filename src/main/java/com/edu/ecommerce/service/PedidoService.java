@@ -8,6 +8,7 @@ import com.edu.ecommerce.dto.PedidoDTOs.PedidoRequestDTO;
 import com.edu.ecommerce.repository.PedidoRepository;
 import com.edu.ecommerce.repository.ProdutoRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -60,9 +61,21 @@ public class PedidoService {
     //
     // Use IA para corrigir ambos os problemas.
     // =========================================================
+    @Transactional
     public Pedido atualizarStatus(UUID pedidoId, String novoStatus) {
         Pedido pedido = pedidoRepository.findById(pedidoId)
                 .orElseThrow(() -> new RuntimeException("Pedido não encontrado: " + pedidoId));
+
+        if ("ENVIADO".equalsIgnoreCase(novoStatus) && !"ENVIADO".equalsIgnoreCase(pedido.getStatus())) {
+            for (ItemPedido item : pedido.getItens()) {
+                Produto produto = item.getProduto();
+                if (produto.getQuantidadeEstoque() < item.getQuantidade()) {
+                    throw new RuntimeException("Estoque insuficiente para o produto: " + produto.getNome());
+                }
+                produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - item.getQuantidade());
+                produtoRepository.save(produto);
+            }
+        }
 
         pedido.setStatus(novoStatus);
 
